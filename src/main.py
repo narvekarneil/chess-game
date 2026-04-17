@@ -275,6 +275,7 @@ class ChessAdventureGame:
     def __init__(self) -> None:
         pygame.init()
         self.config = UiConfig()
+        self.bundle_root = self._bundle_root()
         self.screen = pygame.display.set_mode((self.config.width, self.config.height))
         pygame.display.set_caption("Poop")
         self.clock = pygame.time.Clock()
@@ -402,6 +403,17 @@ class ChessAdventureGame:
         else:
             self._trigger_room_entry_dialogue_if_needed()
 
+    def _bundle_root(self) -> Path:
+        if getattr(sys, "frozen", False):
+            meipass = getattr(sys, "_MEIPASS", None)
+            if meipass:
+                return Path(meipass)
+            return Path(sys.executable).resolve().parent
+        return Path(__file__).resolve().parent.parent
+
+    def _resource_path(self, *parts: str) -> Path:
+        return self.bundle_root.joinpath(*parts)
+
     def _show_loading_menu(self) -> SaveState:
         has_save = self.save_path.exists()
         mode = "select"
@@ -513,7 +525,7 @@ class ChessAdventureGame:
             pass
 
     def _load_player_sprite(self) -> pygame.Surface | None:
-        sprite_path = Path("assets") / "rhea happy.png"
+        sprite_path = self._resource_path("assets", "rhea happy.png")
         if not sprite_path.exists():
             return None
         try:
@@ -522,7 +534,7 @@ class ChessAdventureGame:
             return None
 
     def _load_pet_scene_surface(self) -> pygame.Surface | None:
-        sprite_path = Path("assets") / "rhea and circe.png"
+        sprite_path = self._resource_path("assets", "rhea and circe.png")
         if not sprite_path.exists():
             return None
         try:
@@ -532,12 +544,12 @@ class ChessAdventureGame:
 
     def _load_npc_sprite(self, npc_id: str) -> pygame.Surface | None:
         sprite_map = {
-            "circe": Path("assets") / "circe.png",
-            "rival": Path("assets") / "neil happy.png",
-            "intro_neil": Path("assets") / "neil happy.png",
-            "pragya_locked": Path("assets") / "pragya.png",
-            "isha_locked": Path("assets") / "isha.png",
-            "gounder_locked": Path("assets") / "gounder.png",
+            "circe": self._resource_path("assets", "circe.png"),
+            "rival": self._resource_path("assets", "neil happy.png"),
+            "intro_neil": self._resource_path("assets", "neil happy.png"),
+            "pragya_locked": self._resource_path("assets", "pragya.png"),
+            "isha_locked": self._resource_path("assets", "isha.png"),
+            "gounder_locked": self._resource_path("assets", "gounder.png"),
         }
         sprite_path = sprite_map.get(npc_id)
         if sprite_path is None or not sprite_path.exists():
@@ -618,7 +630,7 @@ class ChessAdventureGame:
             for piece_type in chess.PIECE_TYPES:
                 color_name = "white" if color == chess.WHITE else "black"
                 piece_name = piece_name_by_type[piece_type]
-                piece_path = Path("assets") / "pieces-basic-png" / f"{color_name}-{piece_name}.png"
+                piece_path = self._resource_path("assets", "pieces-basic-png", f"{color_name}-{piece_name}.png")
                 if not piece_path.exists():
                     continue
                 try:
@@ -919,7 +931,7 @@ class ChessAdventureGame:
             if override_path.exists():
                 return str(override_path)
 
-        project_root = Path.cwd()
+        project_root = self.bundle_root
         candidates: list[Path] = []
 
         if sys.platform.startswith("win"):

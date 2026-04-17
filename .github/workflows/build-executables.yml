@@ -1,0 +1,83 @@
+name: Build Executables
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame python-chess pyinstaller
+
+      - name: Make macOS Stockfish binaries executable
+        if: runner.os == 'macOS'
+        run: |
+          chmod +x engines/macos/stockfish-macos-arm64
+          chmod +x engines/macos/stockfish-macos-x86-64
+
+      - name: Build Windows app
+        if: runner.os == 'Windows'
+        run: >
+          pyinstaller --noconfirm --clean --windowed
+          --name RheaChess
+          --add-data "assets;assets"
+          --add-data "stockfish.exe;."
+          --collect-submodules chess
+          --collect-submodules pygame
+          game.py
+
+      - name: Build macOS app
+        if: runner.os == 'macOS'
+        run: >
+          pyinstaller --noconfirm --clean --windowed
+          --name RheaChess
+          --add-data "assets:assets"
+          --add-data "engines/macos:engines/macos"
+          --collect-submodules chess
+          --collect-submodules pygame
+          game.py
+
+      - name: Archive Windows build
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: Compress-Archive -Path dist\RheaChess\* -DestinationPath dist\RheaChess-windows.zip -Force
+
+      - name: Archive macOS build
+        if: runner.os == 'macOS'
+        run: ditto -c -k --sequesterRsrc --keepParent dist/RheaChess.app dist/RheaChess-macos.zip
+
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: RheaChess-windows
+          path: dist/RheaChess-windows.zip
+
+      - name: Upload macOS artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: RheaChess-macos
+          path: dist/RheaChess-macos.zip
