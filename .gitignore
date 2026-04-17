@@ -1,0 +1,6 @@
+save_state.json
+stockfish-download/
+*.zip
+*.tar
+__pycache__/
+*.pyc
