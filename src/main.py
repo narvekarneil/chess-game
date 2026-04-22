@@ -795,10 +795,10 @@ class ChessAdventureGame:
             "capture_forward": PowerDefinition(
                 power_id="capture_forward",
                 character_id="pragya",
-                name="Forward Capture + Side Step",
+                name="Pawn Upgrade",
                 description="One pawn may capture one square straight forward and move one square left or right.",
                 target_prompt="Select 1 pawn for forward capture and side step.",
-                short_label="Capture forward + move sideways",
+                short_label="Pawn Upgrade",
                 target_kind="pawn",
             ),
             "summon_pawn": PowerDefinition(
@@ -813,10 +813,10 @@ class ChessAdventureGame:
             "paralyze": PowerDefinition(
                 power_id="paralyze",
                 character_id="pragya",
-                name="Paralyze",
+                name="Pragya Paralyze",
                 description="Choose an enemy piece. It cannot move for 2 turns.",
                 target_prompt="Select 1 enemy piece to paralyze.",
-                short_label="Paralyze",
+                short_label="Pragya Paralyze",
                 target_kind="enemy_piece",
             ),
             "double": PowerDefinition(
@@ -839,10 +839,10 @@ class ChessAdventureGame:
             "dragon_knights": PowerDefinition(
                 power_id="dragon_knights",
                 character_id="isha",
-                name="Dragon Knights",
+                name="Dragon Knight",
                 description="Choose a knight to move like a bishop too, then sacrifice a pawn.",
                 target_prompt="Select 1 knight for Dragon Knights.",
-                short_label="Dragon Knights",
+                short_label="Dragon Knight",
                 target_kind="knight",
             ),
             "dragon_queen": PowerDefinition(
@@ -857,10 +857,10 @@ class ChessAdventureGame:
             "death_foretold": PowerDefinition(
                 power_id="death_foretold",
                 character_id="isha",
-                name="Doomed",
+                name="bye",
                 description="Choose any piece other than a king or queen. In 5 turns it will be removed.",
                 target_prompt="Select 1 non-king, non-queen piece.",
-                short_label="Doomed",
+                short_label="bye",
                 target_kind="non_king_queen_piece",
             ),
             "underpromote": PowerDefinition(
@@ -875,10 +875,10 @@ class ChessAdventureGame:
             "gamer_god": PowerDefinition(
                 power_id="gamer_god",
                 character_id="gounder",
-                name="Gamer God",
+                name="Grandmaster Gounder",
                 description="See the top 3 recommended engine moves next turn.",
                 target_prompt=None,
-                short_label="Gamer God",
+                short_label="Grandmaster Gounder",
             ),
             "future_sight": PowerDefinition(
                 power_id="future_sight",
@@ -916,10 +916,10 @@ class ChessAdventureGame:
             "king_power": PowerDefinition(
                 power_id="king_power",
                 character_id="gounder",
-                name="King",
+                name="King Gounder",
                 description="Choose your king. It can move like a queen.",
                 target_prompt="Select your king.",
-                short_label="King",
+                short_label="King Gounder",
                 target_kind="king",
             ),
         }
@@ -1836,7 +1836,7 @@ class ChessAdventureGame:
         if power_id == "gamer_god":
             self._mark_power_used(power_id)
             self.next_turn_global_powers.add(power_id)
-            self.chess_result_message = "Gamer God prepared. You'll see the top 3 moves next turn."
+            self.chess_result_message = "Grandmaster Gounder prepared. You'll see the top 3 moves next turn."
             return
         if power_id == "future_sight":
             self._mark_power_used(power_id)
@@ -1922,7 +1922,7 @@ class ChessAdventureGame:
         if power_id == "death_foretold":
             self.death_foretold_targets[square] = 5
             self._mark_power_used(power_id)
-            self.chess_result_message = f"Doomed marked {chess.square_name(square)}."
+            self.chess_result_message = f"bye marked {chess.square_name(square)}."
             return
         if power_id == "underpromote":
             new_piece_type = piece.piece_type
@@ -2172,7 +2172,7 @@ class ChessAdventureGame:
             y += 22
 
         for square, turns in sorted(self.death_foretold_targets.items()):
-            label = self.small_font.render(f"Isha: Doomed {chess.square_name(square)} ({turns})", True, self.config.text)
+            label = self.small_font.render(f"Isha: bye {chess.square_name(square)} ({turns})", True, self.config.text)
             self.screen.blit(label, (panel.left + 16, y))
             y += 22
 
