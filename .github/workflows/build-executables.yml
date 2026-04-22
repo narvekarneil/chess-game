@@ -59,6 +59,42 @@ jobs:
           --collect-submodules pygame
           game.py
 
+      - name: Make macOS app friendlier
+        if: runner.os == 'macOS'
+        run: |
+          chmod +x dist/RheaChess.app/Contents/MacOS/RheaChess
+          find dist/RheaChess.app -name "stockfish*" -exec chmod +x {} \;
+          xattr -cr dist/RheaChess.app || true
+          codesign --force --deep --sign - dist/RheaChess.app || true
+
+      - name: Build macOS debug app
+        if: runner.os == 'macOS'
+        run: >
+          pyinstaller --noconfirm --clean
+          --name RheaChessDebug
+          --add-data "assets:assets"
+          --add-data "engines/macos:engines/macos"
+          --collect-submodules chess
+          --collect-submodules pygame
+          game.py
+
+      - name: Add macOS debug launcher
+        if: runner.os == 'macOS'
+        run: |
+          cat > dist/RheaChessDebug/Open-RheaChess-Debug.command <<'EOF'
+          #!/bin/bash
+          cd "$(dirname "$0")"
+          xattr -dr com.apple.quarantine . 2>/dev/null || true
+          chmod +x ./RheaChessDebug 2>/dev/null || true
+          find . -name "stockfish*" -exec chmod +x {} \; 2>/dev/null || true
+          ./RheaChessDebug
+          echo
+          echo "If the game crashed, copy the error above and send it to Neil/Codex."
+          read -n 1 -s -r -p "Press any key to close..."
+          EOF
+          chmod +x dist/RheaChessDebug/Open-RheaChess-Debug.command
+          find dist/RheaChessDebug -name "stockfish*" -exec chmod +x {} \;
+
       - name: Archive Windows build
         if: runner.os == 'Windows'
         shell: powershell
@@ -67,6 +103,10 @@ jobs:
       - name: Archive macOS build
         if: runner.os == 'macOS'
         run: ditto -c -k --sequesterRsrc --keepParent dist/RheaChess.app dist/RheaChess-macos.zip
+
+      - name: Archive macOS debug build
+        if: runner.os == 'macOS'
+        run: ditto -c -k --sequesterRsrc --keepParent dist/RheaChessDebug dist/RheaChess-macos-debug.zip
 
       - name: Upload Windows artifact
         if: runner.os == 'Windows'
@@ -81,3 +121,10 @@ jobs:
         with:
           name: RheaChess-macos
           path: dist/RheaChess-macos.zip
+
+      - name: Upload macOS debug artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: RheaChess-macos-debug
+          path: dist/RheaChess-macos-debug.zip

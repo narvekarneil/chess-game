@@ -464,7 +464,7 @@ class ChessAdventureGame:
                             mode = "select"
 
             self.screen.fill((16, 18, 26))
-            title = title_font.render("cool game", True, self.config.text)
+            title = title_font.render("rhea's cool adventure", True, self.config.text)
             self.screen.blit(title, (self.config.width // 2 - title.get_width() // 2, 130))
 
             if mode == "select":
